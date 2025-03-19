@@ -19,9 +19,25 @@ body {
 }
 
 h1 {
+    font-family: 'Roboto', sans-serif; /* Custom font */
     color: #333;
     margin-bottom: 20px;
-    font-size: 2em;
+    font-size: 2.2em;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    background: linear-gradient(90deg, #74ebd5, #acb6e5);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    border-bottom: 2px solid #74ebd5; /* Border tweak */
+    padding-bottom: 5px; /* Space between text and border */
+    transition: text-shadow 0.3s ease; /* Smooth hover transition */
+}
+
+h1:hover {
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2); /* Hover effect */
 }
 
 .input-group {
@@ -96,34 +112,12 @@ button:hover {
     line-height: 1.6;
 }
 
-/* Sentiment Highlights */
-#sentiment-text {
-    color: #666;
-}
-
-#sentiment-text:contains('positive') {
-    color: #28a745; /* Green for positive */
-}
-
-#sentiment-text:contains('negative') {
-    color: #dc3545; /* Red for negative */
-}
-
-#sentiment-text:contains('neutral') {
-    color: #6c757d; /* Gray for neutral */
-}
-
-#sentiment-text:contains('excitement') {
-    background: rgba(255, 193, 7, 0.2); /* Yellow highlight for excitement */
-}
-
-#sentiment-text:contains('frustration') {
-    background: rgba(220, 53, 69, 0.2); /* Red highlight for frustration */
-}
-
-#sentiment-text:contains('curiosity') {
-    background: rgba(111, 66, 193, 0.2); /* Purple highlight for curiosity */
-}
+#sentiment-text.positive { color: #28a745; }
+#sentiment-text.negative { color: #dc3545; }
+#sentiment-text.neutral { color: #6c757d; }
+#sentiment-text.excitement { background: rgba(255, 193, 7, 0.2); }
+#sentiment-text.frustration { background: rgba(220, 53, 69, 0.2); }
+#sentiment-text.curiosity { background: rgba(111, 66, 193, 0.2); }
 
 a {
     color: #74ebd5;
@@ -159,4 +153,10 @@ audio {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+#thumbnail {
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }

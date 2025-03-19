@@ -4,49 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIGMARIZE YOUTUBE</title>
-    <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}">
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
     <div class="container">
         <h1>SIGMARIZE YOUTUBE</h1>
-        <form id="summarize-form" method="POST">
-            <div class="input-group">
-                <label for="query">Video Query</label>
-                <input type="text" id="query" name="query" placeholder="e.g., Introduction to Machine Learning" required>
-            </div>
-            <div class="input-group">
-                <label for="summary_style">Summary Style</label>
-                <select id="summary_style" name="summary_style">
-                    <option value="concise">Concise</option>
-                    <option value="short and technical">Short & Technical</option>
-                    <option value="detailed and casual">Detailed & Casual</option>
-                </select>
-            </div>
-            <div class="input-group checkbox">
-                <label>
-                    <input type="checkbox" name="tts_enabled" {% if tts_enabled %}checked{% endif %}> Enable Text-to-Speech
-                </label>
-            </div>
+        <form id="summarize-form">
+            <input type="text" name="query" placeholder="Enter YouTube video query" required>
+            <select name="summary_style">
+                <option value="concise">Concise</option>
+                <option value="short and technical">Short and Technical</option>
+                <option value="detailed and casual">Detailed and Casual</option>
+            </select>
+            <label><input type="checkbox" name="tts_enabled"> Enable TTS</label>
             <button type="submit">Summarize</button>
         </form>
-
-        <div id="loading" class="loading" style="display: none;">
+        <div id="loading" style="display: none;">
             <div class="spinner"></div>
-            <p>Processing...</p>
         </div>
-
-        <div id="result" class="result" {% if not summary %}style="display: none;"{% endif %}>
-            <h2>Summary</h2>
-            <p id="summary-text">{{ summary or '' }}</p>
-            <p><strong>Video Link:</strong> <a id="video-link" href="{{ video_url or '#' }}" target="_blank">{{ video_url or 'Not available' }}</a></p>
-            <h3>Sentiment Analysis</h3>
-            <p id="sentiment-text">{{ sentiment or 'No sentiment analysis available.' }}</p>
-            <audio id="audio-player" controls style="display: none;">
-                <source src="{{ url_for('play_audio') }}" type="audio/mpeg">
-                Your browser does not support audio.
-            </audio>
+        <div id="result" style="display: none;">
+            <h2>Results</h2>
+            <img id="thumbnail" alt="Video Thumbnail" style="max-width: 100%; height: auto;"> <!-- New thumbnail element -->
+            <p><strong>Summary:</strong> <span id="summary-text"></span></p>
+            <p><strong>Video Link:</strong> <a id="video-link" href="#" target="_blank"></a></p>
+            <p><strong>Sentiment:</strong> <span id="sentiment-text"></span></p>
+            <audio id="audio-player" controls style="display: none;"></audio>
         </div>
     </div>
-    <script src="{{ url_for('static', path='/script.js') }}"></script>
+    <script src="/static/script.js"></script>
 </body>
 </html>
