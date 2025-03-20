@@ -3,14 +3,14 @@ from googleapiclient.discovery import build
 from youtube_transcript_api import YouTubeTranscriptApi
 from gtts import gTTS
 from groq import Groq
+import json
 
-# SIGMARIZE YOUTUBE: Using llama-3.3-70b-versatile with detailed prompts and thumbnails
-YOUTUBE_API_KEY = "YOUTUBE API "
-GROQ_API_KEY = "groq api"
+# SIGMARIZE YOUTUBE: Using Groq tool calling with llama-3.3-70b-versatile for detailed outputs
+YOUTUBE_API_KEY = "YOUR_YOUTUBE_API_KEY_HERE"  # Replace with your actual key
+GROQ_API_KEY = "YOUR_GROQ_API_KEY_HERE"        # Replace with your actual key
 
-youtube = build("youtube", "v3", developerKey= "YOUTUBE API")
-groq_client = Groq(api_key= "GROQ API KEY"
-)
+youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
+groq_client = Groq(api_key=GROQ_API_KEY)
 
 def search_youtube_video(query):
     try:
@@ -19,7 +19,7 @@ def search_youtube_video(query):
         if response["items"]:
             video_id = response["items"][0]["id"]["videoId"]
             thumbnail_url = response["items"][0]["snippet"]["thumbnails"]["high"]["url"]
-            print(f"Thumbnail URL: {thumbnail_url}")  # Debug
+            print(f"Thumbnail URL: {thumbnail_url}")
             return f"https://www.youtube.com/watch?v={video_id}", thumbnail_url
         return None, None
     except Exception as e:
@@ -36,43 +36,112 @@ def extract_transcript(video_url):
         print(f"Transcript unavailable: {e}")
         return None
 
-def call_groq(prompt):
-    try:
-        response = groq_client.chat.completions.create(
-            model="llama-3.3-70b-versatile",  
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=1000,  # Increased for detail
-            temperature=0.7  # Balanced creativity and coherence
-        )
-        content = response.choices[0].message.content
-        print(f"Groq response: {content[:200]}...")  
-        return content
-    except Exception as e:
-        print(f"Groq API error: {e}")
-        return f"Error: {e}"
-
-def generate_summary(transcript, style="concise"):
-    if not transcript:
-        return "No transcript available to summarize."
+def summarize(transcript: str, style: str) -> str:
     prompt = (
-        f"Provide a detailed summary of the following YouTube video transcript in a {style} style. "
-        f"Include key points, main ideas, overall tone, and specific examples where relevant. "
-        f"provide accurate names and plot twist. "
-        f"Make it comprehensive and engaging: {transcript}"
+        f"Generate a highly detailed summary of this YouTube transcript in a {style} style. "
+        f"Include all key points, main ideas, specific examples, accurate names, plot twists, and the overall tone. "
+        f"Ensure the summary is comprehensive, engaging, and at least 600 words long: {transcript}"
     )
-    return call_groq(prompt)
+    response = groq_client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=2000,  # Increased for detail
+        temperature=0.7
+    )
+    return response.choices[0].message.content
 
-def analyze_sentiment(transcript):
-    if not transcript:
-        return "Sentiment analysis unavailable due to missing transcript."
+def analyze_sentiment(transcript: str) -> str:
     prompt = (
-        f"Analyze the sentiment of this YouTube video transcript in detail. Provide: "
-        f"1) The overall sentiment (positive, negative, or neutral), "
-        f"2) Specific emotions detected (e.g., excitement, frustration, curiosity) with their intensity (low, moderate, high), "
-        f"3) Key phrases or moments that contribute to the sentiment, including context if possible. "
-        f"Return a concise yet detailed paragraph: {transcript}"
+        f"Perform a detailed sentiment analysis of this YouTube transcript. Include: "
+        f"1) Overall sentiment (positive, negative, neutral) with detailed reasoning, "
+        f"2) Specific emotions detected (e.g., excitement, frustration, curiosity) with their intensity (low, moderate, high) and examples, "
+        f"3) Key phrases or moments driving the sentiment, with thorough context. "
+        f"Return a comprehensive paragraph of at least 250 words: {transcript}"
     )
-    return call_groq(prompt)
+    response = groq_client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=2000,  # Increased for detail
+        temperature=0.7
+    )
+    return response.choices[0].message.content
+
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "summarize",
+            "description": "Generate a detailed summary of a YouTube transcript in a specified style",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "transcript": {"type": "string", "description": "The transcript text"},
+                    "style": {"type": "string", "enum": ["concise", "detailed", "casual"]}
+                },
+                "required": ["transcript", "style"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "analyze_sentiment",
+            "description": "Analyze the sentiment of a YouTube transcript with detailed insights",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "transcript": {"type": "string", "description": "The transcript text"}
+                },
+                "required": ["transcript"]
+            }
+        }
+    }
+]
+
+def process_with_tools(transcript, style="concise"):
+    if not transcript:
+        return "No transcript available.", "Sentiment analysis unavailable."
+
+    # Initial call to trigger tools
+    messages = [
+        {
+            "role": "system",
+            "content": "You are an expert assistant for summarizing YouTube videos and analyzing sentiment. "
+                       "Always use both 'summarize' and 'analyze_sentiment' tools for every transcript, "
+                       "producing detailed outputs: 500+ word summaries and 250+ word sentiment analyses."
+        },
+        {"role": "user", "content": f"Process this transcript in {style} style: {transcript[:1000]}..."}
+    ]
+    response = groq_client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=messages,
+        tools=tools,
+        tool_choice="auto",
+        max_tokens=300  # Just for tool triggering
+    )
+
+    summary, sentiment = None, None
+    if hasattr(response.choices[0].message, "tool_calls") and response.choices[0].message.tool_calls:
+        for tool_call in response.choices[0].message.tool_calls:
+            func_name = tool_call.function.name
+            args = json.loads(tool_call.function.arguments)
+            print(f"Tool called: {func_name} with args: {args}")
+            if func_name == "summarize":
+                summary = summarize(args["transcript"], args["style"])
+            elif func_name == "analyze_sentiment":
+                sentiment = analyze_sentiment(args["transcript"])
+
+    # Enforce both tools regardless of tool call success
+    if not summary:
+        print("Fallback: Manually invoking summarize")
+        summary = summarize(transcript, style)
+    if not sentiment:
+        print("Fallback: Manually invoking analyze_sentiment")
+        sentiment = analyze_sentiment(transcript)
+
+    print(f"Summary preview: {summary[:200]}...")
+    print(f"Sentiment preview: {sentiment[:200]}...")
+    return summary, sentiment
 
 def text_to_speech(summary, output_file="summary.mp3"):
     try:
@@ -86,19 +155,18 @@ def summarize_youtube_video(query, summary_style="concise", tts_enabled=False):
     video_url, thumbnail_url = search_youtube_video(query)
     if not video_url:
         return {"summary": "Video not found.", "video_url": None, "sentiment": "No sentiment analysis possible.", "thumbnail_url": None}
-    
+
     transcript = extract_transcript(video_url)
-    summary = generate_summary(transcript, summary_style)
-    sentiment = analyze_sentiment(transcript)
-    
+    summary, sentiment = process_with_tools(transcript, summary_style)
+
     if tts_enabled:
         text_to_speech(summary)
-    
+
     result = {
         "summary": summary,
         "video_url": video_url,
         "sentiment": sentiment,
         "thumbnail_url": thumbnail_url
     }
-    print(f"Result: {result}")  
+    print(f"Result: {result}")
     return result
