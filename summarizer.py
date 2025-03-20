@@ -4,13 +4,18 @@ from youtube_transcript_api import YouTubeTranscriptApi
 from gtts import gTTS
 from groq import Groq
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # SIGMARIZE YOUTUBE: Using Groq tool calling with llama-3.3-70b-versatile for detailed outputs
-YOUTUBE_API_KEY = "YOUR_YOUTUBE_API_KEY_HERE"  # Replace with your actual key
-GROQ_API_KEY = "YOUR_GROQ_API_KEY_HERE"        # Replace with your actual key
+YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+
 
 youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
 groq_client = Groq(api_key=GROQ_API_KEY)
+
 
 def search_youtube_video(query):
     try:
@@ -26,6 +31,7 @@ def search_youtube_video(query):
         print(f"Error searching YouTube: {e}")
         return None, None
 
+
 def extract_transcript(video_url):
     try:
         video_id = video_url.split("v=")[1]
@@ -35,6 +41,7 @@ def extract_transcript(video_url):
     except Exception as e:
         print(f"Transcript unavailable: {e}")
         return None
+
 
 def summarize(transcript: str, style: str) -> str:
     prompt = (
@@ -49,6 +56,7 @@ def summarize(transcript: str, style: str) -> str:
         temperature=0.7
     )
     return response.choices[0].message.content
+
 
 def analyze_sentiment(transcript: str) -> str:
     prompt = (
@@ -65,6 +73,7 @@ def analyze_sentiment(transcript: str) -> str:
         temperature=0.7
     )
     return response.choices[0].message.content
+
 
 tools = [
     {
@@ -98,6 +107,7 @@ tools = [
     }
 ]
 
+
 def process_with_tools(transcript, style="concise"):
     if not transcript:
         return "No transcript available.", "Sentiment analysis unavailable."
@@ -110,7 +120,8 @@ def process_with_tools(transcript, style="concise"):
                        "Always use both 'summarize' and 'analyze_sentiment' tools for every transcript, "
                        "producing detailed outputs: 500+ word summaries and 250+ word sentiment analyses."
         },
-        {"role": "user", "content": f"Process this transcript in {style} style: {transcript[:1000]}..."}
+        {"role": "user",
+            "content": f"Process this transcript in {style} style: {transcript[:1000]}..."}
     ]
     response = groq_client.chat.completions.create(
         model="llama-3.3-70b-versatile",
@@ -143,6 +154,7 @@ def process_with_tools(transcript, style="concise"):
     print(f"Sentiment preview: {sentiment[:200]}...")
     return summary, sentiment
 
+
 def text_to_speech(summary, output_file="summary.mp3"):
     try:
         tts = gTTS(text=f"Summary: {summary}", lang="en")
@@ -150,6 +162,7 @@ def text_to_speech(summary, output_file="summary.mp3"):
         os.system(f"start {output_file}")
     except Exception as e:
         print(f"Error with TTS: {e}")
+
 
 def summarize_youtube_video(query, summary_style="concise", tts_enabled=False):
     video_url, thumbnail_url = search_youtube_video(query)
