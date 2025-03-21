@@ -93,7 +93,7 @@ tools = [
                 "type": "object",
                 "properties": {
                     "transcript": {"type": "string", "description": "The transcript text"},
-                    "style": {"type": "string", "enum": ["concise", "detailed", "casual"]}
+                    "style": {"type": "string", "enum": ["short", "concise", "detailed"]}
                 },
                 "required": ["transcript", "style"]
             }
@@ -116,7 +116,7 @@ tools = [
 ]
 
 
-def process_with_tools(transcript, style="concise"):
+def process_with_tools(transcript, style):
     if not transcript:
         return "No transcript available.", "Sentiment analysis unavailable."
 
@@ -125,11 +125,17 @@ def process_with_tools(transcript, style="concise"):
         {
             "role": "system",
             "content": "You are an expert assistant for summarizing YouTube videos and analyzing sentiment. "
-                       "Always use both 'summarize' and 'analyze_sentiment' tools for every transcript, "
-                       "producing detailed outputs: 500+ word summaries and 250+ word sentiment analyses."
+                    "Always use both 'summarize' and 'analyze_sentiment' tools for every transcript. "
+                    "Adjust the output length and detail based on the user's requested style: "
+                    "'short' (50-100 words for summaries, 50-100 words for sentiment analyses), "
+                    "'concise' (200-300 words for summaries, 100-150 words for sentiment analyses), "
+                    "or 'detailed' (500+ words for summaries, 250+ words for sentiment analyses). "
+                    "Default to 'concise' if no style is specified."
         },
-        {"role": "user",
-            "content": f"Process this transcript in {style} style: {transcript[:1000]}..."}
+        {
+            "role": "user",
+            "content": f"Process this transcript in {style} style: {transcript[:1000]}..."
+        }
     ]
     response = groq_client.chat.completions.create(
         model="llama-3.3-70b-versatile",
