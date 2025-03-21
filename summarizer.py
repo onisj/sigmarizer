@@ -43,6 +43,7 @@ def extract_transcript(video_url):
     try:
         video_id = video_url.split("v=")[1]
         transcript = ytt_api.get_transcript(video_id)
+        # transcript = ytt_api.fetch(video_id)
         full_text = " ".join([entry["text"] for entry in transcript])
         return full_text[:16000] if len(full_text) > 16000 else full_text
     except Exception as e:
