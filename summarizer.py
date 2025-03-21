@@ -1,6 +1,7 @@
 import os
 from googleapiclient.discovery import build
 from youtube_transcript_api import YouTubeTranscriptApi
+from youtube_transcript_api.proxies import WebshareProxyConfig
 from gtts import gTTS
 from groq import Groq
 import json
@@ -15,6 +16,12 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
 groq_client = Groq(api_key=GROQ_API_KEY)
+ytt_api = YouTubeTranscriptApi(
+    proxy_config=WebshareProxyConfig(
+        proxy_username=os.getenv("PROXY_USERNAME"),
+        proxy_password=os.getenv("PROXY_PASSWORD"),
+    )
+)
 
 
 def search_youtube_video(query):
@@ -35,7 +42,7 @@ def search_youtube_video(query):
 def extract_transcript(video_url):
     try:
         video_id = video_url.split("v=")[1]
-        transcript = YouTubeTranscriptApi.get_transcript(video_id)
+        transcript = ytt_api.get_transcript(video_id)
         full_text = " ".join([entry["text"] for entry in transcript])
         return full_text[:16000] if len(full_text) > 16000 else full_text
     except Exception as e:
