@@ -241,8 +241,12 @@ def summarize_youtube_video(query, summary_style="concise", tts_enabled=False):
 
     transcript = extract_transcript(video_url)
     # summary, sentiment = process_with_tools(transcript, summary_style)
-    summary = summarize(transcript, summary_style)
-    sentiment = analyze_sentiment(transcript, summary_style)
+    if not transcript:
+        summary = "No transcript available."
+        sentiment = "Sentiment analysis unavailable."
+    else:
+        summary = summarize(transcript, summary_style)
+        sentiment = analyze_sentiment(transcript, summary_style)
 
     if tts_enabled:
         text_to_speech(summary)
