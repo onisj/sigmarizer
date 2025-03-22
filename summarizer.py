@@ -12,14 +12,19 @@ load_dotenv()
 # SIGMARIZE YOUTUBE: Using Groq tool calling with llama-3.3-70b-versatile for detailed outputs
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+PROXY_USERNAME = os.getenv("PROXY_USERNAME")
+PROXY_PASSWORD = os.getenv("PROXY_PASSWORD")
+
+print(PROXY_PASSWORD)
+print(PROXY_USERNAME)
 
 
 youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
 groq_client = Groq(api_key=GROQ_API_KEY)
 ytt_api = YouTubeTranscriptApi(
     proxy_config=WebshareProxyConfig(
-        proxy_username=os.getenv("PROXY_USERNAME"),
-        proxy_password=os.getenv("PROXY_PASSWORD"),
+        proxy_username="mqrwokvs",
+        proxy_password="z6v8pne3z7bg",
     )
 )
 
