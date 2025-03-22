@@ -16,16 +16,10 @@ GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 youtube = build("youtube", "v3", developerKey=YOUTUBE_API_KEY)
 groq_client = Groq(api_key=GROQ_API_KEY)
-# ytt_api = YouTubeTranscriptApi(
-#     proxy_config=WebshareProxyConfig(
-#         proxy_username=os.getenv("PROXY_USERNAME"),
-#         proxy_password=os.getenv("PROXY_PASSWORD"),
-#     )
-# )
 ytt_api = YouTubeTranscriptApi(
     proxy_config=WebshareProxyConfig(
-        proxy_username="mqrwokvs",
-        proxy_password="z6v8pne3z7bg",
+        proxy_username=os.getenv("PROXY_USERNAME"),
+        proxy_password=os.getenv("PROXY_PASSWORD"),
     )
 )
 
