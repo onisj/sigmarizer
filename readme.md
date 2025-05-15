@@ -2,6 +2,7 @@
 
 This is a FastAPI-based web application that summarizes YouTube videos by extracting their transcripts, generating detailed summaries in various styles, performing sentiment analysis, and optionally converting summaries to speech. The application leverages AI models and APIs to provide comprehensive and engaging outputs.
 
+
 ## Features
 
 - Search for YouTube videos by query and retrieve the top result.
