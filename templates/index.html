@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGMARIZE YOUTUBE</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="bubble-container">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
+    <div class="container">
+        <header class="header">
+            <h1>SIGMARIZE YOUTUBE</h1>
+        </header>
+        <main>
+            <form id="summarize-form">
+                <input type="text" name="query" placeholder="Enter YouTube video query" required>
+                <select name="summary_style">
+                    <option value="concise">Concise</option>
+                    <option value="short">Short and Technical</option>
+                    <option value="detailed">Detailed and Casual</option>
+                </select>
+                <label><input type="checkbox" name="tts_enabled"> Enable TTS</label>
+                <button type="submit" class="button">Summarize</button>
+            </form>
+            <div id="loading" style="display: none;">
+                <div class="spinner"></div>
+            </div>
+            <div id="result" style="display: none;">
+                <h2>Results</h2>
+                <img id="thumbnail" alt="Video Thumbnail" style="max-width: 100%; height: auto;">
+                <p><strong>Summary:</strong> <span id="summary-text"></span></p>
+                <p><strong>Video Link:</strong> <a id="video-link" href="#" target="_blank"></a></p>
+                <div id="sentiment-box">
+                    <strong>Sentiment:</strong> <span id="sentiment-text"></span>
+                </div>
+                <audio id="audio-player" controls style="display: none;"></audio>
+            </div>
+        </main>
+    </div>
+    <script src="/static/script.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const bubbleContainer = document.querySelector('.bubble-container');
+            for (let i = 0; i < 20; i++) {
+                const bubble = document.createElement('div');
+                bubble.classList.add('bubble');
+                const size = Math.random() * 50 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}%`;
+                bubble.style.animationDuration = `${Math.random() * 10 + 5}s`;
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubbleContainer.appendChild(bubble);
+            }
+        });
+    </script>
+</body>
+
+</html>
